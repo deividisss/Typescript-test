@@ -4,14 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mini project</title>
+    <style>
+      .d-none {
+        display: none;
+      }
+
+      .disabled {
+        pointer-events: none;
+        opacity: 0.6;
+      }
+    </style>
   </head>
   <body>
     <h1>Todos</h1>
     <ul id="todolist"></ul>
 
-    <form id="todoform" action="">
+    <form did="todoform" action="">
       <input id="todoinput" type="text" placeholder="enter a todo" />
       <button id="btn">Click me!</button>
+      <button id="btn-update" class="d-none">Update</button>
       <script src="dist/index.js"></script>
     </form>
   </body>

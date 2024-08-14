@@ -3,12 +3,15 @@ interface Todo {
   completed: boolean;
 }
 
-const btn = document.getElementById("btn") as HTMLButtonElement;
+const btnForm = document.getElementById("btn") as HTMLButtonElement;
+const btnUpdate = document.getElementById("btn-update") as HTMLButtonElement;
 const input = document.getElementById("todoinput") as HTMLInputElement;
 const form = document.querySelector("form");
 const list = document.getElementById("todolist");
 
 const todos: Todo[] = readTodos();
+let editingIndex: number | null = null;
+
 todos.forEach(createTodo);
 
 function readTodos(): Todo[] {
@@ -20,7 +23,7 @@ function saveTodos(todos: Todo[]): void {
   localStorage.setItem("todos", JSON.stringify(todos));
 }
 
-function handleSubmit(e: SubmitEvent) {
+function handleCreateSubmit(e: SubmitEvent) {
   e.preventDefault();
   const newTodoText = input.value.trim();
 
@@ -36,34 +39,75 @@ function handleSubmit(e: SubmitEvent) {
 
   createTodo(newTodo);
   todos.push(newTodo);
-
   saveTodos(todos);
   form?.reset();
+}
+
+function handleUpdateSubmit(e: SubmitEvent) {
+  e.preventDefault();
+  const newTodoText = input.value.trim();
+
+  if (newTodoText.length === 0) {
+    alert("Todo text cannot be empty!");
+    return;
+  }
+
+  if (editingIndex !== null) {
+    todos[editingIndex].text = newTodoText;
+
+    const liElement = list!.children[editingIndex];
+    liElement.firstChild!.textContent = newTodoText;
+    liElement.classList.remove("disabled");
+
+    editingIndex = null;
+    saveTodos(todos);
+    btnUpdate.classList.add("d-none");
+    btnForm.classList.remove("d-none");
+    form?.reset();
+
+    if (!form) return;
+    form!.removeEventListener("submit", handleUpdateSubmit);
+    form!.addEventListener("submit", handleCreateSubmit);
+  }
 }
 
 function createTodo(todo: Todo) {
   const { text, completed } = todo;
 
   const newLI = document.createElement("LI");
-  const checkbox = document.createElement("input");
-  const deleteButton = document.createElement("button");
+  const newLISpan = document.createElement("span");
+  const newLIcheckbox = document.createElement("input");
+  const newLIdeleteButton = document.createElement("button");
 
-  checkbox.type = "checkbox";
-  checkbox.checked = completed;
+  newLIcheckbox.type = "checkbox";
+  newLIcheckbox.checked = completed;
 
-  deleteButton.textContent = "Delete";
+  newLIdeleteButton.textContent = "Delete";
+  newLISpan.textContent = text;
 
-  newLI.append(text);
-  newLI.append(checkbox);
-  newLI.append(deleteButton);
+  newLI.append(newLISpan);
+  newLI.append(newLIcheckbox);
+  newLI.append(newLIdeleteButton);
   list?.append(newLI);
 
-  checkbox.addEventListener("change", () => {
-    todo.completed = checkbox.checked;
+  newLIcheckbox.addEventListener("change", () => {
+    todo.completed = newLIcheckbox.checked;
     saveTodos(todos);
   });
 
-  deleteButton.addEventListener("click", () => {
+  newLISpan.addEventListener("click", () => {
+    btnForm.classList.toggle("d-none");
+    btnUpdate.classList.toggle("d-none");
+    newLI.classList.add("disabled");
+    input.value = todo.text;
+    editingIndex = Array.from(list!.children).indexOf(newLI);
+
+    if (!form) return;
+    form!.removeEventListener("submit", handleCreateSubmit);
+    form!.addEventListener("submit", handleUpdateSubmit);
+  });
+
+  newLIdeleteButton.addEventListener("click", () => {
     const index = todos.indexOf(todo);
 
     if (index > -1) {
@@ -75,4 +119,4 @@ function createTodo(todo: Todo) {
   });
 }
 
-form?.addEventListener("submit", handleSubmit);
+form?.addEventListener("submit", handleCreateSubmit);
