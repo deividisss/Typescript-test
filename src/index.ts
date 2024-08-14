@@ -46,16 +46,31 @@ function createTodo(todo: Todo) {
 
   const newLI = document.createElement("LI");
   const checkbox = document.createElement("input");
+  const deleteButton = document.createElement("button");
 
   checkbox.type = "checkbox";
   checkbox.checked = completed;
-  
+
+  deleteButton.textContent = "Delete";
+
   newLI.append(text);
   newLI.append(checkbox);
+  newLI.append(deleteButton);
   list?.append(newLI);
 
   checkbox.addEventListener("change", () => {
     todo.completed = checkbox.checked;
+    saveTodos(todos);
+  });
+
+  deleteButton.addEventListener("click", () => {
+    const index = todos.indexOf(todo);
+
+    if (index > -1) {
+      todos.splice(index, 1);
+    }
+
+    list?.removeChild(newLI);
     saveTodos(todos);
   });
 }
