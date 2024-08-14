@@ -1,9 +1,14 @@
 "use strict";
-const todos = [];
 const btn = document.getElementById("btn");
 const input = document.getElementById("todoinput");
 const form = document.querySelector("form");
 const list = document.getElementById("todolist");
+const todos = readTodos();
+todos.forEach(createTodo);
+function readTodos() {
+    const todosJSON = localStorage.getItem("todos");
+    return todosJSON ? JSON.parse(todosJSON) : [];
+}
 function handleSubmit(e) {
     e.preventDefault();
     const newTodoText = input.value.trim();
@@ -17,6 +22,7 @@ function handleSubmit(e) {
     };
     createTodo(newTodo);
     todos.push(newTodo);
+    localStorage.setItem("todos", JSON.stringify(todos));
     form.reset();
 }
 function createTodo(todo) {
